@@ -71,7 +71,7 @@ def _format_reviews_block(reviews: list[dict]) -> str:
 
 
 def _discover_themes(reviews: list[dict]) -> dict:
-    """Step A: Ask Gemini to identify 3-5 recurring themes from all reviews."""
+    """Step A: Ask Gemini to identify exactly 3 recurring themes from all reviews."""
     logger.info("Step A: Discovering themes from %d reviews …", len(reviews))
 
     prompt = f"""You are a senior product analyst at a fintech company.
@@ -80,7 +80,7 @@ Here are {len(reviews)} recent user reviews for the IND Money app:
 
 {_format_reviews_block(reviews)}
 
-Identify the top 3-5 recurring themes. For each theme provide:
+Identify exactly 3 recurring themes (no more, no less). For each theme provide:
 - theme_name: a short descriptive label (max 6 words)
 - description: one-sentence explanation of what users are saying
 - sentiment: "positive", "negative", or "mixed"

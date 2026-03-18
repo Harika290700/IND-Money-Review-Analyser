@@ -54,13 +54,25 @@ _analyzer: AnalyzerEngine | None = None
 _anonymizer: AnonymizerEngine | None = None
 
 
+def _ensure_spacy_model(model_name: str = "en_core_web_sm") -> None:
+    """Download the spaCy model if it's not already installed."""
+    import spacy
+    try:
+        spacy.load(model_name)
+    except OSError:
+        logger.info("Downloading spaCy model '%s' …", model_name)
+        from spacy.cli import download
+        download(model_name)
+
+
 def _get_engines() -> tuple[AnalyzerEngine, AnonymizerEngine]:
     """Lazy-init presidio engines so the spaCy model loads only once."""
     global _analyzer, _anonymizer
     if _analyzer is None:
+        _ensure_spacy_model("en_core_web_sm")
         nlp_config = {
             "nlp_engine_name": "spacy",
-            "models": [{"lang_code": "en", "model_name": "en_core_web_lg"}],
+            "models": [{"lang_code": "en", "model_name": "en_core_web_sm"}],
         }
         nlp_engine = NlpEngineProvider(nlp_configuration=nlp_config).create_engine()
         registry = RecognizerRegistry()

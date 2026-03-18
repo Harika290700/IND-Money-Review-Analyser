@@ -105,33 +105,29 @@ st.markdown(
 if run_pipeline:
     st.session_state.pipeline_done = False
     st.session_state.email_sent = False
-    progress = st.progress(0, text="Starting pipeline…")
+    progress = st.progress(0)
 
     try:
-        # Phase 1 -- Scrape
-        progress.progress(5, text="Phase 1: Scraping Play Store reviews…")
+        progress.progress(5)
         from src.phase1_scraper import fetch_recent_reviews
         reviews = fetch_recent_reviews(weeks=weeks)
         st.session_state.reviews = reviews
         st.session_state.metadata = _build_metadata(reviews)
         logger.info("Scraped %d reviews", len(reviews))
 
-        # Phase 2 -- PII scrub
-        progress.progress(25, text="Phase 2: Scrubbing PII…")
+        progress.progress(25)
         from src.phase2_pii import scrub_reviews
         scrubbed = scrub_reviews(reviews)
         st.session_state.scrubbed = scrubbed
         logger.info("Scrubbed %d reviews", len(scrubbed))
 
-        # Phase 3 -- LLM analysis
-        progress.progress(40, text="Phase 3: Analyzing with Gemini (this may take a minute)…")
+        progress.progress(40)
         from src.phase3_analyzer import analyze_reviews
         analysis = analyze_reviews(scrubbed)
         st.session_state.analysis = analysis
         logger.info("Analysis complete: %d themes", len(analysis.get("themes", [])))
 
-        # Phase 4 -- Report
-        progress.progress(80, text="Phase 4: Generating report…")
+        progress.progress(80)
         from src.phase4_report import generate_report
         html, plain = generate_report(
             analysis,
@@ -142,7 +138,7 @@ if run_pipeline:
         st.session_state.text_report = plain
         logger.info("Report generated")
 
-        progress.progress(100, text="Pipeline complete!")
+        progress.progress(100)
         st.session_state.pipeline_done = True
 
     except Exception as e:
@@ -191,9 +187,9 @@ if st.session_state.analysis:
 
     st.markdown("---")
 
-    # Themes
+    # Themes (top 3 only)
     st.subheader("Top Themes")
-    for group in analysis.get("theme_groups", []):
+    for group in analysis.get("theme_groups", [])[:3]:
         sentiment = group.get("sentiment", "mixed")
         color = {"positive": "🟢", "negative": "🔴", "mixed": "🟡"}.get(sentiment, "⚪")
         with st.expander(

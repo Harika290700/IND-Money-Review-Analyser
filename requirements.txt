@@ -1,6 +1,7 @@
 google-play-scraper
 langdetect
 google-generativeai
+spacy
 presidio-analyzer
 presidio-anonymizer
 jinja2
