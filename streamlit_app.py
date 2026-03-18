@@ -71,8 +71,8 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("## Recipient Details")
-    recipient_name = st.text_input("Recipient name", value="Team", placeholder="e.g. Harika")
-    recipient_email = st.text_input("Recipient email", placeholder="user@example.com")
+    recipient_name = st.text_input("Recipient name", value="", placeholder="Name", label_visibility="visible")
+    recipient_email = st.text_input("Recipient email", value="", placeholder="Enter your email here", label_visibility="visible")
 
     st.markdown("---")
     st.markdown("## Actions")
@@ -102,7 +102,7 @@ st.markdown(
     <div style="background: linear-gradient(135deg, #0f4c81, #1a73e8);
                 color: white; padding: 28px 32px; border-radius: 12px;
                 margin-bottom: 24px;">
-        <h1 style="margin:0; font-size:28px;">IND Money Review Analyser</h1>
+        <h1 style="margin:0; font-size:28px;">INDMoney Review Analyser</h1>
         <p style="margin:4px 0 0; opacity:0.85; font-size:15px;">
             Weekly Pulse Dashboard
         </p>
