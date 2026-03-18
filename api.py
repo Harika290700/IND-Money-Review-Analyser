@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -30,9 +31,15 @@ logger = logging.getLogger("api")
 
 app = FastAPI(title="IND Money Review Analyser API", version="1.0.0")
 
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    os.getenv("FRONTEND_URL", ""),
+]
+ALLOWED_ORIGINS = [o for o in ALLOWED_ORIGINS if o]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

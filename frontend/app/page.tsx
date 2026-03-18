@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 
-const API = "http://localhost:8000/api";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 type Phase = "idle" | "scraping" | "scrubbing" | "analyzing" | "reporting" | "emailing" | "done" | "error";
 
