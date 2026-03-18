@@ -4,6 +4,7 @@ google-generativeai
 presidio-analyzer
 presidio-anonymizer
 jinja2
+streamlit
 apscheduler
 fastapi
 uvicorn[standard]
