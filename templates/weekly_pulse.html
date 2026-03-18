@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IND Money Weekly Pulse</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #f4f6f9;
+      color: #1a1a2e;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 24px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0f4c81, #1a73e8);
+      color: #ffffff;
+      padding: 32px 28px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .header .subtitle {
+      font-size: 14px;
+      opacity: 0.85;
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 0;
+      background: #e8f0fe;
+      border-bottom: 1px solid #d2e3fc;
+    }
+
+    .stat {
+      flex: 1;
+      text-align: center;
+      padding: 14px 8px;
+      border-right: 1px solid #d2e3fc;
+    }
+
+    .stat:last-child { border-right: none; }
+
+    .stat .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f4c81;
+    }
+
+    .stat .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #5f6368;
+      margin-top: 2px;
+    }
+
+    .section {
+      padding: 24px 28px;
+      border-bottom: 1px solid #eef0f4;
+    }
+
+    .section:last-child { border-bottom: none; }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #5f6368;
+      margin-bottom: 16px;
+    }
+
+    .theme-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      border-left: 4px solid #9aa0a6;
+    }
+
+    .theme-card.positive { border-left-color: #34a853; }
+    .theme-card.negative { border-left-color: #ea4335; }
+    .theme-card.mixed    { border-left-color: #fbbc04; }
+
+    .theme-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .theme-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    .theme-meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .badge.positive { background: #e6f4ea; color: #137333; }
+    .badge.negative { background: #fce8e6; color: #c5221f; }
+    .badge.mixed    { background: #fef7e0; color: #995c00; }
+
+    .review-count {
+      font-size: 12px;
+      color: #5f6368;
+      font-weight: 500;
+    }
+
+    .theme-desc {
+      font-size: 13px;
+      color: #5f6368;
+      line-height: 1.5;
+    }
+
+    .quote-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .quote-text {
+      font-size: 14px;
+      font-style: italic;
+      color: #3c4043;
+      line-height: 1.55;
+      margin-bottom: 8px;
+    }
+
+    .quote-text::before { content: "\201C"; font-size: 20px; color: #1a73e8; margin-right: 2px; }
+    .quote-text::after  { content: "\201D"; font-size: 20px; color: #1a73e8; margin-left: 2px; }
+
+    .quote-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stars { color: #fbbc04; font-size: 14px; letter-spacing: 1px; }
+    .stars .empty { color: #dadce0; }
+
+    .quote-theme {
+      font-size: 11px;
+      color: #5f6368;
+      background: #e8eaed;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .action-card {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+    }
+
+    .action-number {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1a73e8;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .action-body { flex: 1; }
+
+    .action-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 3px;
+    }
+
+    .action-desc {
+      font-size: 13px;
+      color: #5f6368;
+      line-height: 1.5;
+    }
+
+    .action-tags {
+      margin-top: 5px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .priority-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 10px;
+      letter-spacing: 0.3px;
+    }
+
+    .priority-tag.high   { background: #fce8e6; color: #c5221f; }
+    .priority-tag.medium { background: #fef7e0; color: #995c00; }
+    .priority-tag.low    { background: #e6f4ea; color: #137333; }
+
+    .summary-text {
+      font-size: 14px;
+      color: #3c4043;
+      line-height: 1.65;
+      background: #f8f9fa;
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 4px solid #1a73e8;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 18px 28px;
+      background: #f8f9fa;
+      font-size: 11px;
+      color: #9aa0a6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <h1>IND Money Weekly Pulse</h1>
+      <div class="subtitle">{{ metadata.date_range }}</div>
+    </div>
+
+    <div class="section" style="border-bottom: 1px solid #eef0f4; padding-bottom: 16px;">
+      <p style="font-size: 15px; color: #1a1a2e;">Hi {{ recipient_name }},</p>
+      <p style="font-size: 14px; color: #5f6368; margin-top: 6px;">Here is your weekly pulse report for the IND Money app.</p>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="value">{{ metadata.total_reviews }}</div>
+        <div class="label">Reviews</div>
+      </div>
+      <div class="stat">
+        <div class="value">{{ "%.1f"|format(metadata.avg_rating) }}</div>
+        <div class="label">Avg Rating</div>
+      </div>
+      <div class="stat">
+        <div class="value">{{ themes | length }}</div>
+        <div class="label">Themes</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Top Themes</div>
+      {% for group in theme_groups %}
+      <div class="theme-card {{ group.sentiment }}">
+        <div class="theme-header">
+          <span class="theme-name">{{ group.theme_name }}</span>
+          <div class="theme-meta">
+            <span class="review-count">{{ group.review_count }} reviews</span>
+            <span class="badge {{ group.sentiment }}">{{ group.sentiment }}</span>
+          </div>
+        </div>
+        {% for theme in themes if theme.theme_name == group.theme_name %}
+        <div class="theme-desc">{{ theme.description }}</div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="section">
+      <div class="section-title">Voice of the User</div>
+      {% for q in top_quotes %}
+      <div class="quote-card">
+        <div class="quote-text">{{ q.quote }}</div>
+        <div class="quote-meta">
+          <div class="stars">
+            {% for i in range(5) %}{% if i < q.rating %}&#9733;{% else %}<span class="empty">&#9733;</span>{% endif %}{% endfor %}
+          </div>
+          <span class="quote-theme">{{ q.theme }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="section">
+      <div class="section-title">Action Ideas</div>
+      {% for a in action_ideas %}
+      <div class="action-card">
+        <div class="action-number">{{ loop.index }}</div>
+        <div class="action-body">
+          <div class="action-title">{{ a.title }}</div>
+          <div class="action-desc">{{ a.description }}</div>
+          <div class="action-tags">
+            <span class="priority-tag {{ a.priority }}">{{ a.priority }}</span>
+            <span class="quote-theme">{{ a.related_theme }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="section">
+      <div class="section-title">Executive Summary</div>
+      <div class="summary-text">{{ summary }}</div>
+    </div>
+
+    <div class="footer">
+      Generated automatically &bull; IND Money Review Analyser
+    </div>
+
+  </div>
+</body>
+</html>

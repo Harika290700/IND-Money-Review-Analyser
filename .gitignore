@@ -1,0 +1,15 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+*.egg-info/
+node_modules/
+.next/
+scraped_reviews.csv
+scraped_reviews.json
+scrubbed_reviews.json
+analysis_output.json
+weekly_pulse.html
+weekly_pulse.txt

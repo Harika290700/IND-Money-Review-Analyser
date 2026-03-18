@@ -1,0 +1,11 @@
+google-play-scraper
+langdetect
+google-generativeai
+presidio-analyzer
+presidio-anonymizer
+jinja2
+streamlit
+apscheduler
+fastapi
+uvicorn[standard]
+python-dotenv

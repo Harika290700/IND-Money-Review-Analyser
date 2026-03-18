@@ -1,0 +1,56 @@
+name: Weekly Pulse Report
+
+on:
+  schedule:
+    # Every Monday at 10:05 UTC (3:35 PM IST)
+    - cron: "5 10 * * 1"
+  workflow_dispatch:
+    # Allow manual trigger from GitHub Actions UI
+
+env:
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  SMTP_HOST: ${{ secrets.SMTP_HOST }}
+  SMTP_PORT: ${{ secrets.SMTP_PORT }}
+  SMTP_USER: ${{ secrets.SMTP_USER }}
+  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  RECIPIENT_NAME: ${{ secrets.RECIPIENT_NAME }}
+  RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+
+jobs:
+  generate-and-send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m spacy download en_core_web_sm
+
+      - name: Run full pipeline via CLI
+        run: |
+          python cli.py run \
+            --weeks 10 \
+            --name "$RECIPIENT_NAME" \
+            --email "$RECIPIENT_EMAIL"
+
+      - name: Upload report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-pulse-report
+          path: |
+            weekly_pulse.html
+            weekly_pulse.txt
+            analysis_output.json
+          retention-days: 30
