@@ -123,6 +123,7 @@ if run_pipeline:
 
     progress = st.progress(0)
     status = st.empty()
+    pipeline_ok = False
 
     try:
         progress.progress(5)
@@ -162,12 +163,15 @@ if run_pipeline:
         progress.progress(100)
         status.empty()
         st.session_state.pipeline_done = True
-        st.rerun()
+        pipeline_ok = True
 
     except Exception as e:
         logger.exception("Pipeline failed")
         status.empty()
         st.error(f"Pipeline failed: {e}")
+
+    if pipeline_ok:
+        st.rerun()
 
 # ── Send email ───────────────────────────────────────────────
 if send_email_btn:
@@ -176,6 +180,7 @@ if send_email_btn:
     elif not st.session_state.html_report:
         st.error("Generate the report first before sending email.")
     else:
+        email_ok = False
         with st.spinner("Sending email..."):
             try:
                 from src.phase5_email import send_pulse_email
@@ -192,10 +197,12 @@ if send_email_btn:
                     date_range=st.session_state.metadata["date_range"],
                 )
                 st.session_state.email_sent = True
-                st.rerun()
+                email_ok = True
             except Exception as e:
                 logger.exception("Email send failed")
                 st.error(f"Email failed: {e}")
+        if email_ok:
+            st.rerun()
 
 # ── Status banners ───────────────────────────────────────────
 if st.session_state.pipeline_done:
