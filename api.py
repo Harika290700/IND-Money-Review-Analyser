@@ -45,6 +45,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+def _startup():
+    port = os.getenv("PORT", "8000")
+    logger.info("API starting on port %s, CORS origins: %s", port, ALLOWED_ORIGINS)
+
 # ── In-memory state for the current session ──────────────────────
 _state: dict = {
     "reviews": None,
