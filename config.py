@@ -11,7 +11,7 @@ MAX_BATCHES = 50          # safety cap: 50 × 200 = 10 000 reviews max
 
 # ── Gemini ────────────────────────────────────────────────────
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = "gemini-1.5-flash"
 
 # ── SMTP ──────────────────────────────────────────────────────
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
