@@ -1,14 +1,13 @@
 """
 Streamlit UI for the IND Money Review Analyser pipeline.
 
-Replaces the Next.js + FastAPI stack with a single deployable Python app.
-
 Run locally:
     streamlit run streamlit_app.py
 """
 
 from __future__ import annotations
 
+import importlib
 import logging
 import os
 
@@ -18,11 +17,13 @@ import streamlit as st
 # can read them with os.getenv().  Silently skipped during local dev.
 try:
     for key, value in st.secrets.items():
-        os.environ.setdefault(key, str(value))
+        os.environ[key] = str(value)
 except FileNotFoundError:
     pass
 
 import config
+# Force-reload config so it picks up secrets that were just injected
+importlib.reload(config)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,7 +34,7 @@ logger = logging.getLogger("streamlit_app")
 
 # ── Page config ──────────────────────────────────────────────
 st.set_page_config(
-    page_title="IND Money Weekly Pulse",
+    page_title="INDMoney Weekly Pulse",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -54,7 +55,7 @@ for key, default in {
         st.session_state[key] = default
 
 
-def _build_metadata(reviews: list[dict]) -> dict:
+def _build_metadata(reviews):
     dates = sorted(r["date"] for r in reviews)
     ratings = [r["rating"] for r in reviews]
     return {
@@ -115,10 +116,17 @@ st.markdown(
 if run_pipeline:
     st.session_state.pipeline_done = False
     st.session_state.email_sent = False
+    st.session_state.analysis = None
+    st.session_state.html_report = None
+    st.session_state.text_report = None
+    st.session_state.metadata = None
+
     progress = st.progress(0)
+    status = st.empty()
 
     try:
         progress.progress(5)
+        status.info("Scraping Play Store reviews...")
         from src.phase1_scraper import fetch_recent_reviews
         reviews = fetch_recent_reviews(weeks=weeks)
         st.session_state.reviews = reviews
@@ -126,18 +134,21 @@ if run_pipeline:
         logger.info("Scraped %d reviews", len(reviews))
 
         progress.progress(25)
+        status.info("Scrubbing PII...")
         from src.phase2_pii import scrub_reviews
         scrubbed = scrub_reviews(reviews)
         st.session_state.scrubbed = scrubbed
         logger.info("Scrubbed %d reviews", len(scrubbed))
 
         progress.progress(40)
+        status.info("Analyzing with Gemini (this may take a minute)...")
         from src.phase3_analyzer import analyze_reviews
         analysis = analyze_reviews(scrubbed)
         st.session_state.analysis = analysis
         logger.info("Analysis complete: %d themes", len(analysis.get("themes", [])))
 
         progress.progress(80)
+        status.info("Generating report...")
         from src.phase4_report import generate_report
         html, plain = generate_report(
             analysis,
@@ -149,10 +160,13 @@ if run_pipeline:
         logger.info("Report generated")
 
         progress.progress(100)
+        status.empty()
         st.session_state.pipeline_done = True
+        st.rerun()
 
     except Exception as e:
         logger.exception("Pipeline failed")
+        status.empty()
         st.error(f"Pipeline failed: {e}")
 
 # ── Send email ───────────────────────────────────────────────
@@ -162,9 +176,14 @@ if send_email_btn:
     elif not st.session_state.html_report:
         st.error("Generate the report first before sending email.")
     else:
-        with st.spinner("Sending email…"):
+        with st.spinner("Sending email..."):
             try:
                 from src.phase5_email import send_pulse_email
+                logger.info(
+                    "SMTP config: host=%s, port=%s, user=%s, password_set=%s",
+                    config.SMTP_HOST, config.SMTP_PORT,
+                    config.SMTP_USER, bool(config.SMTP_PASSWORD),
+                )
                 send_pulse_email(
                     html_content=st.session_state.html_report,
                     text_content=st.session_state.text_report,
@@ -173,6 +192,7 @@ if send_email_btn:
                     date_range=st.session_state.metadata["date_range"],
                 )
                 st.session_state.email_sent = True
+                st.rerun()
             except Exception as e:
                 logger.exception("Email send failed")
                 st.error(f"Email failed: {e}")
@@ -186,10 +206,9 @@ if st.session_state.email_sent:
 # ── Metrics ──────────────────────────────────────────────────
 if st.session_state.metadata:
     meta = st.session_state.metadata
-    c1, c2, c3 = st.columns(3)
+    c1, c2 = st.columns(2)
     c1.metric("Total Reviews", meta["total_reviews"])
     c2.metric("Avg Rating", f"{meta['avg_rating']:.1f}")
-    c3.metric("Date Range", meta["date_range"])
 
 # ── Analysis details (expandable) ────────────────────────────
 if st.session_state.analysis:
