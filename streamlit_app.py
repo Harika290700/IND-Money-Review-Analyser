@@ -10,7 +10,17 @@ Run locally:
 from __future__ import annotations
 
 import logging
+import os
+
 import streamlit as st
+
+# Bridge Streamlit Cloud secrets into env vars so config.py / phase modules
+# can read them with os.getenv().  Silently skipped during local dev.
+try:
+    for key, value in st.secrets.items():
+        os.environ.setdefault(key, str(value))
+except FileNotFoundError:
+    pass
 
 import config
 
