@@ -1,0 +1,14 @@
+__pycache__
+*.pyc
+.env
+.git
+.github
+frontend
+node_modules
+output
+*.md
+render.yaml
+vercel.json
+railway.toml
+.dockerignore
+.gitignore
