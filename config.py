@@ -6,12 +6,12 @@ load_dotenv()
 # ── App identity ──────────────────────────────────────────────
 APP_ID = "in.indwealth"
 DEFAULT_WEEKS = 10
-REVIEWS_PER_BATCH = 200
-MAX_BATCHES = 50          # safety cap: 50 × 200 = 10 000 reviews max
+REVIEWS_PER_BATCH = 100
+MAX_REVIEWS_FOR_LLM = 300  # cap total reviews sent to LLM to stay within token budget
 
 # ── Groq LLM ─────────────────────────────────────────────────
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
 
 # ── SMTP ──────────────────────────────────────────────────────
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")

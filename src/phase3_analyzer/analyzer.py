@@ -1,12 +1,12 @@
 """
 Phase 3 -- Groq LLM Analysis (Batched)
 
-Two-step analysis pipeline with batching for Groq's 128K context window:
+Two-step analysis pipeline with batching for Groq's context window:
   Step A: Discover exactly 3 themes from a representative sample.
-  Step B: Process ALL reviews in batches against those themes,
+  Step B: Process reviews in batches against those themes,
           then merge results across batches.
 
-Uses Groq (llama-3.3-70b-versatile) with JSON output.
+Uses Groq (llama-3.1-8b-instant) with JSON output.
 """
 
 from __future__ import annotations
@@ -25,7 +25,8 @@ logger = logging.getLogger(__name__)
 _client = None
 
 MAX_RETRIES = 5
-BATCH_SIZE = config.REVIEWS_PER_BATCH  # 200 reviews per batch
+BATCH_SIZE = config.REVIEWS_PER_BATCH  # 100 reviews per batch
+MAX_REVIEWS = config.MAX_REVIEWS_FOR_LLM  # 300 total reviews cap
 
 
 def _get_client():
@@ -50,7 +51,7 @@ def _call_llm(prompt: str) -> dict:
             )
             return json.loads(response.choices[0].message.content)
         except RateLimitError:
-            wait = min(15 * attempt, 60)
+            wait = min(30 * attempt, 90)
             logger.warning(
                 "Rate limited (attempt %d/%d). Retrying in %ds …",
                 attempt, MAX_RETRIES, wait,
@@ -248,6 +249,10 @@ def analyze_reviews(reviews: list[dict]) -> dict:
     """
     if not reviews:
         raise ValueError("No reviews provided for analysis.")
+
+    if len(reviews) > MAX_REVIEWS:
+        logger.info("Capping reviews from %d to %d to stay within token budget", len(reviews), MAX_REVIEWS)
+        reviews = reviews[:MAX_REVIEWS]
 
     # Step A: Discover themes
     themes = _discover_themes(reviews)
