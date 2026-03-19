@@ -1,13 +1,13 @@
 """
-Phase 3 -- Gemini LLM Analysis
+Phase 3 -- Groq LLM Analysis
 
 Two-step analysis pipeline:
-  Step A: Discover 3-5 recurring themes from the full review corpus.
+  Step A: Discover exactly 3 recurring themes from the review corpus.
   Step B: Group reviews under themes, pick representative quotes,
           generate action ideas, and write an executive summary.
 
-Uses Gemini 2.0 Flash with structured JSON output.
-Gemini's 1M-token context window allows sending all reviews in a single call.
+Uses Groq (llama-3.3-70b-versatile) with JSON output.
+Reviews are truncated if needed to fit the 128K context window.
 """
 
 from __future__ import annotations
@@ -16,40 +16,40 @@ import json
 import logging
 import time
 
-import google.generativeai as genai
-from google.api_core.exceptions import ResourceExhausted
+from groq import Groq, RateLimitError
 
 import config
 
 logger = logging.getLogger(__name__)
 
-_model = None
+_client = None
 
 MAX_RETRIES = 5
+MAX_REVIEWS_PER_CALL = 400
 
 
-def _get_model():
-    global _model
-    if _model is None:
-        genai.configure(api_key=config.GEMINI_API_KEY)
-        _model = genai.GenerativeModel(config.GEMINI_MODEL)
-    return _model
+def _get_client():
+    global _client
+    if _client is None:
+        if not config.GROQ_API_KEY:
+            raise ValueError("GROQ_API_KEY not set. Add it to .env or Streamlit secrets.")
+        _client = Groq(api_key=config.GROQ_API_KEY)
+    return _client
 
 
-def _call_gemini(prompt: str) -> dict:
-    """Send a prompt to Gemini with retry on rate-limit errors."""
-    model = _get_model()
+def _call_llm(prompt: str) -> dict:
+    """Send a prompt to Groq with retry on rate-limit errors."""
+    client = _get_client()
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            response = model.generate_content(
-                prompt,
-                generation_config=genai.GenerationConfig(
-                    response_mime_type="application/json",
-                    temperature=0.3,
-                ),
+            response = client.chat.completions.create(
+                model=config.GROQ_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.3,
+                response_format={"type": "json_object"},
             )
-            return json.loads(response.text)
-        except ResourceExhausted as e:
+            return json.loads(response.choices[0].message.content)
+        except RateLimitError as e:
             wait = min(15 * attempt, 60)
             logger.warning(
                 "Rate limited (attempt %d/%d). Retrying in %ds …",
@@ -71,7 +71,7 @@ def _format_reviews_block(reviews: list[dict]) -> str:
 
 
 def _discover_themes(reviews: list[dict]) -> dict:
-    """Step A: Ask Gemini to identify exactly 3 recurring themes from all reviews."""
+    """Step A: Identify exactly 3 recurring themes."""
     logger.info("Step A: Discovering themes from %d reviews …", len(reviews))
 
     prompt = f"""You are a senior product analyst at a fintech company.
@@ -98,7 +98,7 @@ Return JSON in this exact format:
   ]
 }}"""
 
-    result = _call_gemini(prompt)
+    result = _call_llm(prompt)
     themes = result.get("themes", [])
     logger.info("Discovered %d themes: %s", len(themes), [t["theme_name"] for t in themes])
     return result
@@ -149,7 +149,7 @@ Return JSON in this exact format:
   "summary": "2-3 sentence executive summary..."
 }}"""
 
-    result = _call_gemini(prompt)
+    result = _call_llm(prompt)
     logger.info(
         "Extraction complete: %d theme groups, %d quotes, %d actions",
         len(result.get("theme_groups", [])),
@@ -161,14 +161,10 @@ Return JSON in this exact format:
 
 def analyze_reviews(reviews: list[dict]) -> dict:
     """
-    Two-step Gemini analysis: discover themes, then group and extract.
-
-    All reviews are sent in a single call per step -- Gemini's 1M-token
-    context window easily handles hundreds of reviews without batching.
+    Two-step Groq analysis: discover themes, then group and extract.
 
     Args:
         reviews: List of review dicts with 'review_text' and 'rating' keys.
-                 Should already be PII-scrubbed.
 
     Returns:
         Combined analysis dict with keys:
@@ -177,6 +173,10 @@ def analyze_reviews(reviews: list[dict]) -> dict:
     """
     if not reviews:
         raise ValueError("No reviews provided for analysis.")
+
+    if len(reviews) > MAX_REVIEWS_PER_CALL:
+        logger.info("Truncating %d reviews to %d to fit context window", len(reviews), MAX_REVIEWS_PER_CALL)
+        reviews = reviews[:MAX_REVIEWS_PER_CALL]
 
     themes = _discover_themes(reviews)
     extraction = _group_and_extract(reviews, themes)
