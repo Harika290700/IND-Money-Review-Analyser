@@ -7,6 +7,7 @@ load_dotenv()
 APP_ID = "in.indwealth"
 DEFAULT_WEEKS = 10
 REVIEWS_PER_BATCH = 100
+MAX_BATCHES = 50           # safety cap for scraper pagination
 MAX_REVIEWS_FOR_LLM = 300  # cap total reviews sent to LLM to stay within token budget
 
 # ── Groq LLM ─────────────────────────────────────────────────
