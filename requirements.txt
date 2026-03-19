@@ -1,6 +1,6 @@
 google-play-scraper
 langdetect
-groq
+google-generativeai
 jinja2
 streamlit
 apscheduler

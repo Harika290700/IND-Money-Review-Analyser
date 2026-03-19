@@ -9,9 +9,9 @@ DEFAULT_WEEKS = 10
 REVIEWS_PER_BATCH = 200
 MAX_BATCHES = 50          # safety cap: 50 × 200 = 10 000 reviews max
 
-# ── Groq LLM ─────────────────────────────────────────────────
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+# ── Gemini ────────────────────────────────────────────────────
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL = "gemini-2.0-flash"
 
 # ── SMTP ──────────────────────────────────────────────────────
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
