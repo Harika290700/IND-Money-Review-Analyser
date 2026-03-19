@@ -13,8 +13,6 @@ import os
 
 import streamlit as st
 
-# Bridge Streamlit Cloud secrets into env vars so config.py / phase modules
-# can read them with os.getenv().  Silently skipped during local dev.
 try:
     for key, value in st.secrets.items():
         os.environ[key] = str(value)
@@ -22,7 +20,6 @@ except FileNotFoundError:
     pass
 
 import config
-# Force-reload config so it picks up secrets that were just injected
 importlib.reload(config)
 
 logging.basicConfig(
@@ -32,7 +29,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("streamlit_app")
 
-# ── Page config ──────────────────────────────────────────────
 st.set_page_config(
     page_title="INDMoney Weekly Pulse",
     page_icon="📊",
@@ -40,7 +36,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Session state defaults ───────────────────────────────────
 for key, default in {
     "reviews": None,
     "scrubbed": None,
@@ -132,21 +127,18 @@ if run_pipeline:
         reviews = fetch_recent_reviews(weeks=weeks)
         st.session_state.reviews = reviews
         st.session_state.metadata = _build_metadata(reviews)
-        logger.info("Scraped %d reviews", len(reviews))
 
         progress.progress(25)
         status.info("Scrubbing PII...")
         from src.phase2_pii import scrub_reviews
         scrubbed = scrub_reviews(reviews)
         st.session_state.scrubbed = scrubbed
-        logger.info("Scrubbed %d reviews", len(scrubbed))
 
         progress.progress(40)
-        status.info("Analyzing with Gemini (this may take a minute)...")
+        status.info("Analyzing with LLM (this may take a minute)...")
         from src.phase3_analyzer import analyze_reviews
         analysis = analyze_reviews(scrubbed)
         st.session_state.analysis = analysis
-        logger.info("Analysis complete: %d themes", len(analysis.get("themes", [])))
 
         progress.progress(80)
         status.info("Generating report...")
@@ -158,7 +150,6 @@ if run_pipeline:
         )
         st.session_state.html_report = html
         st.session_state.text_report = plain
-        logger.info("Report generated")
 
         progress.progress(100)
         status.empty()
@@ -184,11 +175,6 @@ if send_email_btn:
         with st.spinner("Sending email..."):
             try:
                 from src.phase5_email import send_pulse_email
-                logger.info(
-                    "SMTP config: host=%s, port=%s, user=%s, password_set=%s",
-                    config.SMTP_HOST, config.SMTP_PORT,
-                    config.SMTP_USER, bool(config.SMTP_PASSWORD),
-                )
                 send_pulse_email(
                     html_content=st.session_state.html_report,
                     text_content=st.session_state.text_report,
@@ -210,71 +196,12 @@ if st.session_state.pipeline_done:
 if st.session_state.email_sent:
     st.success(f"Email sent to {recipient_email}!")
 
-# ── Metrics ──────────────────────────────────────────────────
-if st.session_state.metadata:
-    meta = st.session_state.metadata
-    c1, c2 = st.columns(2)
-    c1.metric("Total Reviews", meta["total_reviews"])
-    c2.metric("Avg Rating", f"{meta['avg_rating']:.1f}")
-
-# ── Analysis details (expandable) ────────────────────────────
-if st.session_state.analysis:
-    analysis = st.session_state.analysis
-
-    st.markdown("---")
-
-    # Themes (top 3 only)
-    st.subheader("Top Themes")
-    for group in analysis.get("theme_groups", [])[:3]:
-        sentiment = group.get("sentiment", "mixed")
-        color = {"positive": "🟢", "negative": "🔴", "mixed": "🟡"}.get(sentiment, "⚪")
-        with st.expander(
-            f"{color}  **{group['theme_name']}**  —  "
-            f"{group.get('review_count', 0)} reviews  |  {sentiment.upper()}"
-        ):
-            for t in analysis.get("themes", []):
-                if t["theme_name"] == group["theme_name"]:
-                    st.write(t.get("description", ""))
-            samples = group.get("sample_reviews", [])
-            if samples:
-                st.markdown("**Sample reviews:**")
-                for s in samples[:3]:
-                    st.markdown(f"- _{s}_")
-
-    # Quotes
-    st.subheader("Voice of the User")
-    for q in analysis.get("top_quotes", []):
-        rating = q.get("rating", 0)
-        stars = "★" * rating + "☆" * (5 - rating)
-        st.markdown(
-            f"> *\"{q['quote']}\"*\n>\n"
-            f"> {stars}  ·  {q.get('theme', '')}"
-        )
-
-    # Action Ideas
-    st.subheader("Action Ideas")
-    for i, a in enumerate(analysis.get("action_ideas", []), 1):
-        priority = a.get("priority", "medium")
-        badge = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(priority, "⚪")
-        st.markdown(
-            f"**{i}. {a['title']}** {badge} `{priority.upper()}`\n\n"
-            f"{a.get('description', '')}  \n"
-            f"_Related: {a.get('related_theme', '')}_"
-        )
-
-    # Summary
-    if analysis.get("summary"):
-        st.subheader("Executive Summary")
-        st.info(analysis["summary"])
-
-# ── HTML report preview ──────────────────────────────────────
+# ── HTML report only ─────────────────────────────────────────
 if st.session_state.html_report:
-    st.markdown("---")
-    st.subheader("Report Preview")
-    st.components.v1.html(st.session_state.html_report, height=900, scrolling=True)
+    st.components.v1.html(st.session_state.html_report, height=1200, scrolling=True)
 
 # ── Empty state ──────────────────────────────────────────────
-if not st.session_state.metadata and not st.session_state.pipeline_done:
+if not st.session_state.html_report and not run_pipeline:
     st.markdown(
         """
         <div style="text-align:center; padding:60px 20px; color:#999;">
