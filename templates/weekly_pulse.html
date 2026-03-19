@@ -1,252 +1,178 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>INDMoney Weekly Pulse</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: #f0f2f5;
-      color: #1a1a2e;
-      line-height: 1.7;
-      display: flex;
-      justify-content: center;
-      padding: 32px 16px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 720px;
-      background: #ffffff;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-    }
-
-    /* ── Header ─────────────────────────────── */
-    .header {
-      background: linear-gradient(135deg, #0a2e5c 0%, #1a73e8 100%);
-      color: #fff;
-      padding: 36px 32px 28px;
-      text-align: center;
-    }
-    .header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
-    .header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 6px; }
-
-    /* ── Greeting ───────────────────────────── */
-    .greeting {
-      padding: 24px 32px;
-      border-bottom: 1px solid #eef0f4;
-      text-align: center;
-    }
-    .greeting p { font-size: 14px; color: #5f6368; }
-    .greeting strong { color: #1a1a2e; }
-
-    /* ── Stats Bar ──────────────────────────── */
-    .stats-bar {
-      display: flex;
-      background: #f0f6ff;
-      border-bottom: 1px solid #d2e3fc;
-    }
-    .stat {
-      flex: 1;
-      text-align: center;
-      padding: 18px 12px;
-      border-right: 1px solid #d2e3fc;
-    }
-    .stat:last-child { border-right: none; }
-    .stat .value { font-size: 26px; font-weight: 700; color: #0a2e5c; }
-    .stat .label {
-      font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
-      color: #5f6368; margin-top: 4px;
-    }
-
-    /* ── Section ────────────────────────────── */
-    .section { padding: 28px 32px; border-bottom: 1px solid #eef0f4; }
-    .section:last-of-type { border-bottom: none; }
-    .section-title {
-      font-size: 12px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 1.2px; color: #1a73e8; margin-bottom: 20px;
-      text-align: center;
-    }
-
-    /* ── Theme Cards ────────────────────────── */
-    .theme-card {
-      background: #fafbfc;
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin-bottom: 12px;
-      border-left: 5px solid #9aa0a6;
-    }
-    .theme-card.positive { border-left-color: #34a853; }
-    .theme-card.negative { border-left-color: #ea4335; }
-    .theme-card.mixed    { border-left-color: #fbbc04; }
-
-    .theme-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 8px; flex-wrap: wrap; gap: 8px;
-    }
-    .theme-name { font-size: 15px; font-weight: 600; color: #1a1a2e; }
-    .theme-meta { display: flex; gap: 8px; align-items: center; }
-
-    .badge {
-      display: inline-block; padding: 3px 12px; border-radius: 12px;
-      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    .badge.positive { background: #e6f4ea; color: #137333; }
-    .badge.negative { background: #fce8e6; color: #c5221f; }
-    .badge.mixed    { background: #fef7e0; color: #995c00; }
-
-    .review-count { font-size: 12px; color: #5f6368; font-weight: 500; }
-    .theme-desc { font-size: 13px; color: #5f6368; line-height: 1.6; }
-
-    /* ── Quote Cards ────────────────────────── */
-    .quote-card {
-      background: #fafbfc; border-radius: 10px; padding: 20px;
-      margin-bottom: 12px; border-left: 4px solid #1a73e8;
-    }
-    .quote-text {
-      font-size: 14px; font-style: italic; color: #3c4043;
-      line-height: 1.6; margin-bottom: 12px;
-    }
-    .quote-text::before { content: "\201C"; font-size: 22px; color: #1a73e8; margin-right: 4px; vertical-align: -2px; }
-    .quote-text::after  { content: "\201D"; font-size: 22px; color: #1a73e8; margin-left: 4px; vertical-align: -2px; }
-
-    .quote-meta { display: flex; justify-content: space-between; align-items: center; }
-    .stars { color: #fbbc04; font-size: 16px; letter-spacing: 2px; }
-    .stars .empty { color: #dadce0; }
-    .quote-theme {
-      font-size: 11px; color: #5f6368; background: #e8eaed;
-      padding: 3px 10px; border-radius: 10px;
-    }
-
-    /* ── Action Cards ───────────────────────── */
-    .action-card {
-      display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start;
-    }
-    .action-number {
-      flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
-      background: linear-gradient(135deg, #0a2e5c, #1a73e8);
-      color: #fff; font-size: 14px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .action-body { flex: 1; }
-    .action-title { font-size: 14px; font-weight: 600; color: #1a1a2e; margin-bottom: 4px; }
-    .action-desc { font-size: 13px; color: #5f6368; line-height: 1.6; }
-    .action-tags { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
-
-    .priority-tag {
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
-      padding: 3px 10px; border-radius: 10px; letter-spacing: 0.5px;
-    }
-    .priority-tag.high   { background: #fce8e6; color: #c5221f; }
-    .priority-tag.medium { background: #fef7e0; color: #995c00; }
-    .priority-tag.low    { background: #e6f4ea; color: #137333; }
-
-    /* ── Summary ────────────────────────────── */
-    .summary-text {
-      font-size: 14px; color: #3c4043; line-height: 1.7;
-      background: #f0f6ff; padding: 20px 24px; border-radius: 10px;
-      border-left: 5px solid #1a73e8; text-align: left;
-    }
-
-    /* ── Footer ─────────────────────────────── */
-    .footer {
-      text-align: center; padding: 20px 32px;
-      background: #fafbfc; font-size: 11px; color: #9aa0a6;
-      border-top: 1px solid #eef0f4;
-    }
-  </style>
 </head>
-<body>
-  <div class="container">
+<body style="margin:0; padding:0; background-color:#f0f2f5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:#1a1a2e; line-height:1.7;">
 
-    <div class="header">
-      <h1>INDMoney Weekly Pulse</h1>
-      <div class="subtitle">{{ metadata.date_range }}</div>
-    </div>
+  <!-- Outer wrapper for centering -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f2f5;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
 
-    <div class="greeting">
-      <p>Hi <strong>{{ recipient_name }}</strong>, here is your weekly pulse report for the INDMoney app.</p>
-    </div>
+        <!-- Main container -->
+        <table role="presentation" width="680" cellpadding="0" cellspacing="0" border="0" style="max-width:680px; width:100%; background-color:#ffffff; border-radius:12px; overflow:hidden; border-collapse:collapse;">
 
-    <div class="stats-bar">
-      <div class="stat">
-        <div class="value">{{ metadata.total_reviews }}</div>
-        <div class="label">Reviews</div>
-      </div>
-      <div class="stat">
-        <div class="value">{{ "%.1f"|format(metadata.avg_rating) }}</div>
-        <div class="label">Avg Rating</div>
-      </div>
-      <div class="stat">
-        <div class="value">{{ themes | length }}</div>
-        <div class="label">Themes</div>
-      </div>
-    </div>
+          <!-- Header -->
+          <tr>
+            <td align="center" style="background-color:#1a73e8; padding:36px 32px 28px;">
+              <h1 style="margin:0; font-size:24px; font-weight:700; color:#ffffff; letter-spacing:-0.3px;">INDMoney Weekly Pulse</h1>
+              <p style="margin:6px 0 0; font-size:13px; color:rgba(255,255,255,0.8);">{{ metadata.date_range }}</p>
+            </td>
+          </tr>
 
-    <div class="section">
-      <div class="section-title">Top Themes</div>
-      {% for group in theme_groups %}
-      <div class="theme-card {{ group.sentiment }}">
-        <div class="theme-header">
-          <span class="theme-name">{{ group.theme_name }}</span>
-          <div class="theme-meta">
-            <span class="review-count">{{ group.review_count }} reviews</span>
-            <span class="badge {{ group.sentiment }}">{{ group.sentiment }}</span>
-          </div>
-        </div>
-        {% for theme in themes if theme.theme_name == group.theme_name %}
-        <div class="theme-desc">{{ theme.description }}</div>
-        {% endfor %}
-      </div>
-      {% endfor %}
-    </div>
+          <!-- Greeting -->
+          <tr>
+            <td align="center" style="padding:24px 32px; border-bottom:1px solid #eef0f4;">
+              <p style="margin:0; font-size:14px; color:#5f6368;">Hi <strong style="color:#1a1a2e;">{{ recipient_name }}</strong>, here is your weekly pulse report for the INDMoney app.</p>
+            </td>
+          </tr>
 
-    <div class="section">
-      <div class="section-title">Voice of the User</div>
-      {% for q in top_quotes %}
-      <div class="quote-card">
-        <div class="quote-text">{{ q.quote }}</div>
-        <div class="quote-meta">
-          <div class="stars">
-            {% for i in range(5) %}{% if i < q.rating %}&#9733;{% else %}<span class="empty">&#9733;</span>{% endif %}{% endfor %}
-          </div>
-          <span class="quote-theme">{{ q.theme }}</span>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
+          <!-- Stats Bar -->
+          <tr>
+            <td style="padding:0; background-color:#f0f6ff; border-bottom:1px solid #d2e3fc;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                <tr>
+                  <td align="center" width="33%" style="padding:18px 12px; border-right:1px solid #d2e3fc;">
+                    <div style="font-size:26px; font-weight:700; color:#0a2e5c;">{{ metadata.total_reviews }}</div>
+                    <div style="font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#5f6368; margin-top:4px;">Reviews</div>
+                  </td>
+                  <td align="center" width="33%" style="padding:18px 12px; border-right:1px solid #d2e3fc;">
+                    <div style="font-size:26px; font-weight:700; color:#0a2e5c;">{{ "%.1f"|format(metadata.avg_rating) }}</div>
+                    <div style="font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#5f6368; margin-top:4px;">Avg Rating</div>
+                  </td>
+                  <td align="center" width="34%" style="padding:18px 12px;">
+                    <div style="font-size:26px; font-weight:700; color:#0a2e5c;">{{ themes | length }}</div>
+                    <div style="font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#5f6368; margin-top:4px;">Themes</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-    <div class="section">
-      <div class="section-title">Action Ideas</div>
-      {% for a in action_ideas %}
-      <div class="action-card">
-        <div class="action-number">{{ loop.index }}</div>
-        <div class="action-body">
-          <div class="action-title">{{ a.title }}</div>
-          <div class="action-desc">{{ a.description }}</div>
-          <div class="action-tags">
-            <span class="priority-tag {{ a.priority }}">{{ a.priority }}</span>
-            <span class="quote-theme">{{ a.related_theme }}</span>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
+          <!-- Top Themes -->
+          <tr>
+            <td style="padding:28px 32px; border-bottom:1px solid #eef0f4;">
+              <p style="margin:0 0 20px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:#1a73e8; text-align:center;">Top Themes</p>
 
-    <div class="section">
-      <div class="section-title">Executive Summary</div>
-      <div class="summary-text">{{ summary }}</div>
-    </div>
+              {% for group in theme_groups %}
+              {% set border_color = "#ea4335" if group.sentiment == "negative" else ("#34a853" if group.sentiment == "positive" else "#fbbc04") %}
+              {% set badge_bg = "#fce8e6" if group.sentiment == "negative" else ("#e6f4ea" if group.sentiment == "positive" else "#fef7e0") %}
+              {% set badge_color = "#c5221f" if group.sentiment == "negative" else ("#137333" if group.sentiment == "positive" else "#995c00") %}
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px; border-collapse:collapse;">
+                <tr>
+                  <td width="5" style="background-color:{{ border_color }}; border-radius:4px 0 0 4px;"></td>
+                  <td style="background-color:#fafbfc; padding:16px 20px; border-radius:0 8px 8px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                      <tr>
+                        <td style="font-size:15px; font-weight:600; color:#1a1a2e;">{{ group.theme_name }}</td>
+                        <td align="right" style="white-space:nowrap;">
+                          <span style="font-size:12px; color:#5f6368; font-weight:500;">{{ group.review_count }} reviews</span>
+                          &nbsp;
+                          <span style="display:inline-block; padding:3px 12px; border-radius:12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; background-color:{{ badge_bg }}; color:{{ badge_color }};">{{ group.sentiment }}</span>
+                        </td>
+                      </tr>
+                    </table>
+                    {% for theme in themes if theme.theme_name == group.theme_name %}
+                    <p style="margin:8px 0 0; font-size:13px; color:#5f6368; line-height:1.6;">{{ theme.description }}</p>
+                    {% endfor %}
+                  </td>
+                </tr>
+              </table>
+              {% endfor %}
+            </td>
+          </tr>
 
-    <div class="footer">
-      Generated automatically &bull; INDMoney Review Analyser
-    </div>
+          <!-- Voice of the User -->
+          <tr>
+            <td style="padding:28px 32px; border-bottom:1px solid #eef0f4;">
+              <p style="margin:0 0 20px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:#1a73e8; text-align:center;">Voice of the User</p>
 
-  </div>
+              {% for q in top_quotes %}
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px; border-collapse:collapse;">
+                <tr>
+                  <td width="4" style="background-color:#1a73e8; border-radius:4px 0 0 4px;"></td>
+                  <td style="background-color:#fafbfc; padding:18px 20px; border-radius:0 8px 8px 0;">
+                    <p style="margin:0 0 12px; font-size:14px; font-style:italic; color:#3c4043; line-height:1.6;">
+                      <span style="font-size:20px; color:#1a73e8;">&ldquo;</span>{{ q.quote }}<span style="font-size:20px; color:#1a73e8;">&rdquo;</span>
+                    </p>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                      <tr>
+                        <td style="font-size:16px; color:#fbbc04; letter-spacing:2px;">
+                          {% for i in range(5) %}{% if i < q.rating %}&#9733;{% else %}<span style="color:#dadce0;">&#9733;</span>{% endif %}{% endfor %}
+                        </td>
+                        <td align="right">
+                          <span style="font-size:11px; color:#5f6368; background-color:#e8eaed; padding:3px 10px; border-radius:10px;">{{ q.theme }}</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              {% endfor %}
+            </td>
+          </tr>
+
+          <!-- Action Ideas -->
+          <tr>
+            <td style="padding:28px 32px; border-bottom:1px solid #eef0f4;">
+              <p style="margin:0 0 20px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:#1a73e8; text-align:center;">Action Ideas</p>
+
+              {% for a in action_ideas %}
+              {% set pri_bg = "#fce8e6" if a.priority == "high" else ("#e6f4ea" if a.priority == "low" else "#fef7e0") %}
+              {% set pri_color = "#c5221f" if a.priority == "high" else ("#137333" if a.priority == "low" else "#995c00") %}
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px; border-collapse:collapse;">
+                <tr>
+                  <td width="36" valign="top" style="padding-right:14px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                      <tr>
+                        <td align="center" style="width:32px; height:32px; background-color:#1a73e8; border-radius:50%; font-size:14px; font-weight:700; color:#ffffff; line-height:32px;">{{ loop.index }}</td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td valign="top">
+                    <p style="margin:0 0 4px; font-size:14px; font-weight:600; color:#1a1a2e;">{{ a.title }}</p>
+                    <p style="margin:0; font-size:13px; color:#5f6368; line-height:1.6;">{{ a.description }}</p>
+                    <p style="margin:8px 0 0;">
+                      <span style="display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; padding:3px 10px; border-radius:10px; letter-spacing:0.5px; background-color:{{ pri_bg }}; color:{{ pri_color }};">{{ a.priority }}</span>
+                      &nbsp;
+                      <span style="display:inline-block; font-size:11px; color:#5f6368; background-color:#e8eaed; padding:3px 10px; border-radius:10px;">{{ a.related_theme }}</span>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              {% endfor %}
+            </td>
+          </tr>
+
+          <!-- Executive Summary -->
+          <tr>
+            <td style="padding:28px 32px;">
+              <p style="margin:0 0 20px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:#1a73e8; text-align:center;">Executive Summary</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                <tr>
+                  <td width="5" style="background-color:#1a73e8; border-radius:4px 0 0 4px;"></td>
+                  <td style="background-color:#f0f6ff; padding:20px 24px; border-radius:0 8px 8px 0; font-size:14px; color:#3c4043; line-height:1.7;">{{ summary }}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding:20px 32px; background-color:#fafbfc; border-top:1px solid #eef0f4; font-size:11px; color:#9aa0a6;">
+              Generated automatically &bull; INDMoney Review Analyser
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Main container -->
+
+      </td>
+    </tr>
+  </table>
+
 </body>
 </html>
